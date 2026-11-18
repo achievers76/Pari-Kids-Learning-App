@@ -1,0 +1,39 @@
+name: Build Pari Kids APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Create Android Project & Build APK
+        run: |
+          flutter create --platforms=android --project-name pari_kids .
+          sed -i 's/android:label="pari_kids"/android:label="Pari Kids"/g' android/app/src/main/AndroidManifest.xml
+          flutter pub get
+          flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pari-Kids-LKG-App
+          path: build/app/outputs/flutter-apk/app-release.apk
+          
